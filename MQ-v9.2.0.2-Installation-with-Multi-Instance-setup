@@ -1,0 +1,111 @@
+
+IBM MQv9.2.0.2 Installation on New VM(with RHEL v7.6)
+(Multi-Instance QMGR Setup)
+
+Server1:
+1). OS Prerequisites:
+       i. Check the OS version and should be RHEL v7.6:
+              #cat /etc/redhat-release
+                Red Hat Enterprise Linux Server release 7.6 (Maipo)
+       ii. Set the 'nproc' (hard and soft) value as '4096' for ‘mqm’ in '/etc/security/limits.d/90-nproc.conf'
+       iii. Set the 'nofile' (hard and soft) value as '10240' for ‘mqm’ in '/etc/security/limits.conf'
+       iv. Create ‘mqm’ user id and ‘mqm’ group id in the MQ installing server
+       v. Please check and increase the ‘/’, ‘/home’, ‘/var’ and ‘/opt’ partition, if its lower than 10GB.
+
+2). MQ Installation:
+       i. Move the MQ binary file to the server to install.
+       ii. Untar the source file and install:
+              #tar -xvzf 9.2.0.2XXX.tar.gz
+              #cd MQServer/
+       iii. Accept the license:
+              #./mqlicense.sh -accept
+       iv. Install MQ through rpm command:
+              #rpm -ivh MQSeries*.rpm
+              #rpm -qa | grep MQSeries
+       v. To check all the prerequisites are passed without any failure.
+              #su mqm -c "/opt/mqm/bin/mqconfig"
+       vi. Set the primary installation path:
+              # cd /opt/mqm/bin 
+              #./setmqinst -i -p /opt/mqm
+              #dspmqver
+              #dspmq -o installation
+
+Server2:
+1). OS Prerequisites:
+       i. Check the OS version and should be RHEL v7.6:
+              #cat /etc/redhat-release
+               Red Hat Enterprise Linux Server release 7.6 (Maipo)
+       ii. Set the 'nproc' (hard and soft) value as '4096' for ‘mqm’ in '/etc/security/limits.d/90-nproc.conf'
+       iii. Set the 'nofile' (hard and soft) value as '10240' for ‘mqm’ in '/etc/security/limits.conf'
+       iv. Create ‘mqm’ user id and ‘mqm’ group id in the MQ installing server
+       v. Please check and increase the ‘/’, ‘/home’, ‘/var’ and ‘/opt’ partition, if its lower than 10GB.
+
+2). MQ Installation:
+       i. Move the MQ binary file to the server to install.
+       ii. Untar the source file and install:
+              #tar -xvzf 9.2.0.2XXX.tar.gz
+              #cd MQServer/
+       iii. Accept the license:
+              #./mqlicense.sh -accept
+       iv. Install MQ through rpm command:
+              #rpm -ivh MQSeries*.rpm
+              #rpm -qa | grep MQSeries
+       v. To check all the prerequisites are passed without any failure.
+              #su mqm -c "/opt/mqm/bin/mqconfig"
+       vi. Set the primary installation path:
+              # cd /opt/mqm/bin 
+              #./setmqinst -i -p /opt/mqm
+              #dspmqver
+              #dspmq -o installation
+
+4). Creating QMGR on NFS Shared storage on Server1:
+       i. Create ‘data’ and ‘logs’ folders on NFS shared storage with appropriate QMGR name:
+              #mkdir -p /nfsdrive*/mqha/WMQ/QMGR1/logs
+              #mkdir -p /nfsdrive*/mqha/WMQ/QMGR1/data
+       ii. change the permission and ownership of those folders:
+              #chown -R mqm:mqm /nfsdrive*/mqha/WMQ/QMGR1/logs
+              #chown -R mqm:mqm /nfsdrive*/mqha/WMQ/QMGR1/data
+              #chmod -R 0775 /nfsdrive*/mqha/WMQ/QMGR1/logs
+              #chmod -R 0775 /nfsdrive*/mqha/WMQ/QMGR1/data
+       iii. create queue managers on nfs shared storage using ‘crtmqm’ command:
+              #crtmqm -md /nfsdrive*/mqha/WMQ/QMGR1/data -ld /nfsdrive*/mqha/WMQ/QMGR1/logs -lf 8192 -lp 200 -ls 200 QMGR1
+       iv. Run this command on Server1, copy and run the output of the command on Server2 for multi-instance setup QMGR for QMGR1:
+              #dspmqinf -o command QMGR1
+                addmqinf -s QueueManager -v Name=QMGR1 -v Directory=QMGR1 -v Prefix=/var/mqm -v DataPath= /nfsdrive*/mqha/WMQ/QMGR1/data /QMGR1  
+           run the above ‘addmqinf’ command on Server2 to add QMGR1 as multi-instance between Server1 and Server2.
+       v. start the QMGR1 on Server1:
+              #strmqm -x QMGR1
+       vi. Run the command below on Server2:
+              #addmqinf -s QueueManager -v Name=QMGR1 -v Directory=QMGR1 -v Prefix=/var/mqm -v DataPath= /nfsdrive*/mqha/WMQ/QMGR1/data /QMGR1  
+              #strmqm -x QMGR1
+              #dspmq -xf -m QMGR1
+       After starting QMGR1 on both servers, On 
+          Server1 – QMGR1(Running)
+          Server2 – QMGR1(Standby)
+
+
+5). Creating QMGR on NFS Shared storage on Server2:
+       i. Create ‘data’ and ‘logs’ folders on NFS shared storage with appropriate QMGR name:
+              #mkdir -p /nfsdrive*/mqha/WMQ/QMGR2/logs
+              #mkdir -p /nfsdrive*/mqha/WMQ/QMGR2/data
+       ii. change the permission and ownership of those folders:
+              #chown -R mqm:mqm /nfsdrive*/mqha/WMQ/QMGR2/logs
+              #chown -R mqm:mqm /nfsdrive*/mqha/WMQ/QMGR2/data
+              #chmod -R 0775 /nfsdrive*/mqha/WMQ/QMGR2/logs
+              #chmod -R 0775 /nfsdrive*/mqha/WMQ/QMGR2/data
+       iii. create queue managers on nfs shared storage using ‘crtmqm’ command:
+              #crtmqm -md /nfsdrive*/mqha/WMQ/QMGR2/data -ld /nfsdrive*/mqha/WMQ/QMGR2/logs -lf 8192 -lp 200 -ls 200 QMGR2
+       iv. Run this command on Server2, copy and run the output of the command on Server1 for multi-instance setup QMGR for QMGR2:
+              #dspmqinf -o command QMGR2
+                addmqinf -s QueueManager -v Name=QMGR2 -v Directory=QMGR2 -v Prefix=/var/mqm -v DataPath= /nfsdrive*/mqha/WMQ/QMGR2/data /QMGR2  
+           run the above ‘addmqinf’ command on Server1 to add QMGR2 as multi-instance between Server1 and Server2.
+       v. start the QMGR2 on Server2:
+              #strmqm -x QMGR2
+       vi. Run the command below on Server1:
+              #addmqinf -s QueueManager -v Name=QMGR2 -v Directory=QMGR2 -v Prefix=/var/mqm -v DataPath= /nfsdrive*/mqha/WMQ/QMGR2/data /QMGR2  
+              #strmqm -x QMGR2
+              # dspmq -xf -m QMGR2
+       After starting QMGR2 on both servers, On 
+           Server1 – QMGR2(Standby)
+           Server2 – QMGR2(Running)
+
