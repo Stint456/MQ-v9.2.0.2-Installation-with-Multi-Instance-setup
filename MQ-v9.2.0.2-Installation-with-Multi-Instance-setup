@@ -31,7 +31,7 @@ Server1:
               #dspmq -o installation
 
 Server2:
-1). OS Prerequisites:
+3). OS Prerequisites:
        i. Check the OS version and should be RHEL v7.6:
               #cat /etc/redhat-release
                Red Hat Enterprise Linux Server release 7.6 (Maipo)
@@ -40,7 +40,7 @@ Server2:
        iv. Create ‘mqm’ user id and ‘mqm’ group id in the MQ installing server
        v. Please check and increase the ‘/’, ‘/home’, ‘/var’ and ‘/opt’ partition, if its lower than 10GB.
 
-2). MQ Installation:
+4). MQ Installation:
        i. Move the MQ binary file to the server to install.
        ii. Untar the source file and install:
               #tar -xvzf 9.2.0.2XXX.tar.gz
@@ -58,7 +58,7 @@ Server2:
               #dspmqver
               #dspmq -o installation
 
-4). Creating QMGR on NFS Shared storage on Server1:
+5). Creating QMGR on NFS Shared storage on Server1:
        i. Create ‘data’ and ‘logs’ folders on NFS shared storage with appropriate QMGR name:
               #mkdir -p /nfsdrive*/mqha/WMQ/QMGR1/logs
               #mkdir -p /nfsdrive*/mqha/WMQ/QMGR1/data
@@ -84,7 +84,7 @@ Server2:
           Server2 – QMGR1(Standby)
 
 
-5). Creating QMGR on NFS Shared storage on Server2:
+6). Creating QMGR on NFS Shared storage on Server2:
        i. Create ‘data’ and ‘logs’ folders on NFS shared storage with appropriate QMGR name:
               #mkdir -p /nfsdrive*/mqha/WMQ/QMGR2/logs
               #mkdir -p /nfsdrive*/mqha/WMQ/QMGR2/data
